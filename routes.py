@@ -3,6 +3,7 @@ from app import app, db
 from models import SolarPlant, WeatherData, EnergyProduction, MLPrediction, ModelPerformance, MaintenanceRecord
 from ml_models import ml_predictor
 from weather_api import weather_api
+from weekly_analytics import VVCEWeeklyAnalytics
 from datetime import datetime, timedelta, date
 import logging
 import json
@@ -263,26 +264,59 @@ def predictions(plant_id=None):
         flash('Error loading predictions', 'error')
         return redirect(url_for('index'))
 
+@app.route('/analytics')
+@app.route('/analytics/<int:plant_id>')
+def analytics_dashboard(plant_id=None):
+    """Advanced Analytics Dashboard"""
+    try:
+        # Get plant
+        if plant_id:
+            plant = SolarPlant.query.get_or_404(plant_id)
+        else:
+            plant = SolarPlant.query.first()
+            if not plant:
+                flash('No solar plants found', 'warning')
+                return redirect(url_for('index'))
+            plant_id = plant.id
+        
+        # Get all plants for navigation
+        all_plants = SolarPlant.query.all()
+        
+        return render_template('analytics_dashboard.html',
+                             plant=plant,
+                             all_plants=all_plants)
+        
+    except Exception as e:
+        logging.error(f"Error in analytics dashboard route: {e}")
+        flash('Error loading analytics dashboard', 'error')
+        return redirect(url_for('index'))
+
 @app.route('/api/train_model/<int:plant_id>', methods=['POST'])
 def train_model(plant_id):
-    """API endpoint to train ML model"""
+    """API endpoint to train ML model with advanced weekly analytics"""
     try:
+        # Initialize analytics system
+        weekly_analytics = VVCEWeeklyAnalytics()
+        
+        # Train the base ML model
         success = ml_predictor.train_models(plant_id)
         
         if success:
-            # Generate new predictions
-            predictions = ml_predictor.predict_6_months(plant_id)
+            # Generate advanced weekly predictions
+            weekly_results = weekly_analytics.generate_weekly_predictions(plant_id, ml_predictor)
             
-            if predictions:
+            if weekly_results:
                 return jsonify({
                     'success': True,
-                    'message': 'Model trained successfully and predictions generated',
-                    'predictions_count': len(predictions)
+                    'message': 'Advanced weekly prediction model trained successfully',
+                    'predictions_count': weekly_results['total_weeks'],
+                    'quarterly_analysis': len(weekly_results['quarterly_analysis']),
+                    'baseline_performance': weekly_results['baseline_performance']['data_points']
                 })
             else:
                 return jsonify({
                     'success': False,
-                    'message': 'Model trained but prediction generation failed'
+                    'message': 'Model trained but weekly prediction generation failed'
                 })
         else:
             return jsonify({
@@ -291,7 +325,7 @@ def train_model(plant_id):
             })
             
     except Exception as e:
-        logging.error(f"Error training model: {e}")
+        logging.error(f"Error training model with weekly analytics: {e}")
         return jsonify({
             'success': False,
             'message': f'Error: {str(e)}'

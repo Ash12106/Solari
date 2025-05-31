@@ -1,0 +1,559 @@
+{% extends "base.html" %}
+
+{% block title %}Advanced Analytics - VVCE Solar Intelligence{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <div class="plant-selector">
+                <h5 class="mb-3">
+                    <i class="fas fa-brain me-2"></i>
+                    Intelligence Center
+                </h5>
+                <div class="list-group">
+                    {% for p in all_plants %}
+                    <a href="{{ url_for('analytics_dashboard', plant_id=p.id) }}" 
+                       class="list-group-item list-group-item-action {% if p.id == plant.id %}active{% endif %}">
+                        <strong>{{ p.name.replace('VVCE ', '').replace(' Solar Plant', '') }}</strong>
+                        <br>
+                        <small class="text-muted">{{ p.capacity_mw }} MW</small>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10">
+            <!-- Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="analytics-header">
+                        <h1 class="mb-2">
+                            <i class="fas fa-chart-pie text-primary me-2"></i>
+                            Advanced Analytics Dashboard
+                        </h1>
+                        <p class="text-muted mb-3">
+                            <strong>{{ plant.name }}</strong> | AI-Powered Insights & Performance Intelligence
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Score Cards -->
+            <div class="row mb-4">
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card text-white bg-primary">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title" id="overallScore">--</h4>
+                                    <p class="card-text">Overall Performance</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-trophy fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card text-white bg-success">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title" id="weeklyEnergy">--</h4>
+                                    <p class="card-text">This Week Energy</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-bolt fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card text-white bg-info">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title" id="confidenceScore">--</h4>
+                                    <p class="card-text">Prediction Confidence</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-brain fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card text-white bg-warning">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title" id="riskLevel">--</h4>
+                                    <p class="card-text">Risk Assessment</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-shield-alt fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weekly Performance Chart -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-line me-2"></i>
+                                26-Week Performance Forecast
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="weeklyPerformanceChart" height="400"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Insights & Risk Analysis -->
+            <div class="row mb-4">
+                <div class="col-lg-8 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-lightbulb me-2"></i>
+                                AI-Generated Insights
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="insightsContainer">
+                                <div class="text-center p-4">
+                                    <i class="fas fa-spinner fa-spin fa-2x text-muted"></i>
+                                    <p class="text-muted mt-2">Analyzing performance patterns...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-danger text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Risk Factors
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="riskContainer">
+                                <div class="text-center p-4">
+                                    <i class="fas fa-shield-alt fa-2x text-success"></i>
+                                    <p class="text-muted mt-2">Loading risk analysis...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quarterly Analysis -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                Quarterly Performance Analysis
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row" id="quarterlyAnalysis">
+                                <!-- Quarterly data will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Best & Worst Performance Weeks -->
+            <div class="row mb-4">
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow-sm border-success">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-star me-2"></i>
+                                Peak Performance Weeks
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="bestWeeks">
+                                <!-- Best weeks will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow-sm border-warning">
+                        <div class="card-header bg-warning text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-tools me-2"></i>
+                                Improvement Opportunities
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="improvementWeeks">
+                                <!-- Improvement opportunities will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions Panel -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex flex-wrap gap-2">
+                                <button class="btn btn-primary" onclick="refreshAnalytics({{ plant.id }})">
+                                    <i class="fas fa-sync-alt me-2"></i>Refresh Analytics
+                                </button>
+                                <button class="btn btn-success" onclick="generateWeeklyReport({{ plant.id }})">
+                                    <i class="fas fa-file-pdf me-2"></i>Generate Report
+                                </button>
+                                <button class="btn btn-info" onclick="exportAnalytics({{ plant.id }})">
+                                    <i class="fas fa-download me-2"></i>Export Data
+                                </button>
+                                <a href="{{ url_for('predictions', plant_id=plant.id) }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-chart-line me-2"></i>Detailed Predictions
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Advanced Analytics Dashboard JavaScript
+let weeklyChart = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    initializeAnalyticsDashboard({{ plant.id }});
+});
+
+async function initializeAnalyticsDashboard(plantId) {
+    try {
+        // Load weekly analytics data
+        const response = await fetch(`/api/weekly_analytics/${plantId}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            updatePerformanceCards(data.analytics);
+            createWeeklyPerformanceChart(data.analytics.weekly_forecasts);
+            displayInsights(data.analytics.insights);
+            displayRiskFactors(data.analytics.risk_factors);
+            displayQuarterlyAnalysis(data.analytics.quarterly_analysis);
+            displayBestWorstWeeks(data.analytics.weekly_forecasts);
+        } else {
+            showError('Failed to load analytics data');
+        }
+    } catch (error) {
+        console.error('Error loading analytics:', error);
+        showError('Error loading analytics dashboard');
+    }
+}
+
+function updatePerformanceCards(analytics) {
+    const currentWeek = analytics.weekly_forecasts[0];
+    
+    document.getElementById('overallScore').textContent = 
+        Math.round(currentWeek.performance_score) + '%';
+    
+    document.getElementById('weeklyEnergy').textContent = 
+        Math.round(currentWeek.total_energy).toLocaleString() + ' kWh';
+    
+    document.getElementById('confidenceScore').textContent = 
+        Math.round(currentWeek.confidence * 100) + '%';
+    
+    const riskLevel = analytics.risk_factors.length > 2 ? 'High' : 
+                     analytics.risk_factors.length > 0 ? 'Medium' : 'Low';
+    document.getElementById('riskLevel').textContent = riskLevel;
+}
+
+function createWeeklyPerformanceChart(weeklyForecasts) {
+    const ctx = document.getElementById('weeklyPerformanceChart').getContext('2d');
+    
+    if (weeklyChart) {
+        weeklyChart.destroy();
+    }
+    
+    const labels = weeklyForecasts.map(w => `Week ${w.week_number}`);
+    const performanceData = weeklyForecasts.map(w => w.performance_score);
+    const energyData = weeklyForecasts.map(w => w.total_energy);
+    const confidenceData = weeklyForecasts.map(w => w.confidence * 100);
+    
+    weeklyChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Performance Score (%)',
+                data: performanceData,
+                borderColor: '#007bff',
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                tension: 0.4,
+                fill: true,
+                yAxisID: 'y'
+            }, {
+                label: 'Energy Production (kWh)',
+                data: energyData,
+                borderColor: '#28a745',
+                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                tension: 0.4,
+                fill: false,
+                yAxisID: 'y1'
+            }, {
+                label: 'Prediction Confidence (%)',
+                data: confidenceData,
+                borderColor: '#ffc107',
+                backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                tension: 0.4,
+                fill: false,
+                yAxisID: 'y'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            scales: {
+                x: {
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'Forecast Weeks'
+                    }
+                },
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Performance & Confidence (%)'
+                    },
+                    min: 0,
+                    max: 100
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Energy Production (kWh)'
+                    },
+                    grid: {
+                        drawOnChartArea: false,
+                    },
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                }
+            }
+        }
+    });
+}
+
+function displayInsights(insights) {
+    const container = document.getElementById('insightsContainer');
+    
+    if (!insights || insights.length === 0) {
+        container.innerHTML = '<p class="text-muted">No insights available</p>';
+        return;
+    }
+    
+    let html = '';
+    insights.forEach(insight => {
+        const iconClass = insight.type === 'positive' ? 'fa-check-circle text-success' :
+                         insight.type === 'warning' ? 'fa-exclamation-triangle text-warning' :
+                         insight.type === 'alert' ? 'fa-exclamation-circle text-danger' :
+                         'fa-info-circle text-info';
+        
+        html += `
+            <div class="insight-item mb-3 p-3 border-start border-4 border-${insight.type === 'positive' ? 'success' : insight.type === 'warning' ? 'warning' : 'info'}">
+                <div class="d-flex align-items-start">
+                    <i class="fas ${iconClass} me-3 mt-1"></i>
+                    <div>
+                        <h6 class="mb-1">${insight.message}</h6>
+                        <small class="text-muted">${insight.action}</small>
+                        <span class="badge bg-secondary ms-2">${insight.category}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+function displayRiskFactors(riskFactors) {
+    const container = document.getElementById('riskContainer');
+    
+    if (!riskFactors || riskFactors.length === 0) {
+        container.innerHTML = `
+            <div class="text-center p-3">
+                <i class="fas fa-shield-alt fa-2x text-success"></i>
+                <p class="text-success mt-2">No significant risks detected</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    riskFactors.forEach(risk => {
+        const levelColor = risk.level === 'high' ? 'danger' :
+                          risk.level === 'medium' ? 'warning' : 'info';
+        
+        html += `
+            <div class="risk-item mb-2 p-2 border rounded">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="badge bg-${levelColor}">${risk.level.toUpperCase()}</span>
+                    <small class="text-muted">${risk.type}</small>
+                </div>
+                <p class="mb-1 mt-2">${risk.description}</p>
+                <small class="text-muted">Impact: ${risk.impact}</small>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+function displayQuarterlyAnalysis(quarterlyData) {
+    const container = document.getElementById('quarterlyAnalysis');
+    
+    let html = '';
+    Object.keys(quarterlyData).forEach(quarter => {
+        const data = quarterlyData[quarter];
+        html += `
+            <div class="col-md-6 mb-3">
+                <div class="card border-info">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0">${quarter} Analysis</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <h5>${Math.round(data.total_energy / 1000)}k</h5>
+                                <small class="text-muted">Total kWh</small>
+                            </div>
+                            <div class="col-6">
+                                <h5>₹${Math.round(data.total_revenue / 1000)}k</h5>
+                                <small class="text-muted">Revenue</small>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="text-center">
+                            <span class="badge bg-success">${Math.round(data.avg_performance_score)}% Performance</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+function displayBestWorstWeeks(weeklyForecasts) {
+    const bestWeeks = weeklyForecasts
+        .sort((a, b) => b.performance_score - a.performance_score)
+        .slice(0, 3);
+    
+    const worstWeeks = weeklyForecasts
+        .sort((a, b) => a.performance_score - b.performance_score)
+        .slice(0, 3);
+    
+    // Display best weeks
+    let bestHtml = '';
+    bestWeeks.forEach((week, index) => {
+        bestHtml += `
+            <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
+                <div>
+                    <strong>Week ${week.week_number}</strong>
+                    <small class="text-muted d-block">Score: ${Math.round(week.performance_score)}%</small>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-success">#${index + 1}</span>
+                </div>
+            </div>
+        `;
+    });
+    document.getElementById('bestWeeks').innerHTML = bestHtml;
+    
+    // Display improvement weeks
+    let worstHtml = '';
+    worstWeeks.forEach(week => {
+        worstHtml += `
+            <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
+                <div>
+                    <strong>Week ${week.week_number}</strong>
+                    <small class="text-muted d-block">Score: ${Math.round(week.performance_score)}%</small>
+                </div>
+                <div class="text-end">
+                    <i class="fas fa-tools text-warning"></i>
+                </div>
+            </div>
+        `;
+    });
+    document.getElementById('improvementWeeks').innerHTML = worstHtml;
+}
+
+function refreshAnalytics(plantId) {
+    location.reload();
+}
+
+function generateWeeklyReport(plantId) {
+    // Implementation for report generation
+    alert('Weekly report generation feature coming soon!');
+}
+
+function exportAnalytics(plantId) {
+    // Implementation for data export
+    alert('Analytics export feature coming soon!');
+}
+
+function showError(message) {
+    console.error(message);
+    // Could implement toast notifications here
+}
+</script>
+{% endblock %}

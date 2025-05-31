@@ -211,7 +211,7 @@ class SolarMLPredictor:
             return False
     
     def predict_6_months(self, plant_id, weather_forecast=None):
-        """Generate 6-month predictions"""
+        """Generate 6-month weekly predictions with advanced analytics"""
         try:
             if not self.rf_model or not self.xgb_model:
                 if not self.load_models():
@@ -227,11 +227,84 @@ class SolarMLPredictor:
             predictions = []
             start_date = datetime.now().date()
             
-            for i in range(180):  # 6 months = 180 days
-                pred_date = start_date + timedelta(days=i)
+            # Generate weekly predictions (26 weeks = 6 months)
+            for week in range(26):
+                week_start = start_date + timedelta(weeks=week)
+                week_end = week_start + timedelta(days=6)
                 
-                # Create feature vector (simplified - would use weather forecast in production)
-                features = self._create_prediction_features(plant, pred_date, weather_forecast)
+                # Generate daily predictions for the week and aggregate
+                weekly_energy = 0
+                weekly_revenue = 0
+                weekly_efficiency_sum = 0
+                daily_predictions = []
+                
+                for day_offset in range(7):
+                    pred_date = week_start + timedelta(days=day_offset)
+                    
+                    # Create feature vector for each day
+                    features = self._create_prediction_features(plant, pred_date, weather_forecast)
+                    
+                    if features is not None:
+                        features_scaled = self.scaler.transform([features])
+                        
+                        # Get predictions from both models
+                        if self.rf_model is None or self.xgb_model is None:
+                            logging.error("Models not loaded. Training required.")
+                            continue
+                            
+                        rf_pred = self.rf_model.predict(features_scaled)[0]
+                        xgb_pred = self.xgb_model.predict(features_scaled)[0]
+                        
+                        # Ensemble prediction (average)
+                        daily_energy = (rf_pred + xgb_pred) / 2
+                        daily_revenue = daily_energy * 4.5  # INR per kWh
+                        daily_efficiency = features[5]  # equipment efficiency
+                        
+                        # Accumulate weekly totals
+                        weekly_energy += daily_energy
+                        weekly_revenue += daily_revenue
+                        weekly_efficiency_sum += daily_efficiency
+                        
+                        daily_predictions.append({
+                            'date': pred_date,
+                            'energy': daily_energy,
+                            'revenue': daily_revenue,
+                            'efficiency': daily_efficiency
+                        })
+                
+                # Calculate weekly aggregates and analytics
+                if daily_predictions:
+                    avg_weekly_efficiency = weekly_efficiency_sum / len(daily_predictions)
+                    
+                    # Advanced analytics
+                    energy_variance = np.var([d['energy'] for d in daily_predictions])
+                    peak_day = max(daily_predictions, key=lambda x: x['energy'])
+                    low_day = min(daily_predictions, key=lambda x: x['energy'])
+                    
+                    # Weekly performance score (0-100)
+                    performance_score = min(100, (weekly_energy / (plant.capacity_mw * 1000 * 7 * 8)) * 100)
+                    
+                    # Confidence based on variance and historical patterns
+                    confidence = max(0.6, min(0.95, 0.9 - (energy_variance / weekly_energy) * 0.3))
+                    
+                    weekly_prediction = {
+                        'week_start': week_start,
+                        'week_end': week_end,
+                        'week_number': week + 1,
+                        'energy': weekly_energy,
+                        'revenue': weekly_revenue,
+                        'efficiency': avg_weekly_efficiency,
+                        'confidence': confidence,
+                        'performance_score': performance_score,
+                        'energy_variance': energy_variance,
+                        'peak_day': peak_day['date'],
+                        'peak_energy': peak_day['energy'],
+                        'low_day': low_day['date'],
+                        'low_energy': low_day['energy'],
+                        'daily_breakdown': daily_predictions
+                    }
+                    
+                    predictions.append(weekly_prediction)
                 
                 if features is not None:
                     features_scaled = self.scaler.transform([features])
