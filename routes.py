@@ -413,20 +413,22 @@ def get_chart_data(plant_id, chart_type):
             })
         
         elif chart_type == 'predictions':
-            # Get predictions data
+            # Get predictions data (all 180 days for 6-month forecast)
             predictions = MLPrediction.query.filter(
                 MLPrediction.plant_id == plant_id
-            ).order_by(MLPrediction.prediction_date).limit(60).all()
+            ).order_by(MLPrediction.prediction_date).all()
+            
+            logging.info(f"Found {len(predictions)} predictions for plant {plant_id}")
             
             return jsonify({
                 'success': True,
                 'data': [
                     {
                         'date': pred.prediction_date.isoformat(),
-                        'energy': pred.predicted_energy,
-                        'revenue': pred.predicted_revenue,
-                        'efficiency': pred.predicted_efficiency,
-                        'confidence': pred.confidence_score
+                        'energy': float(pred.predicted_energy),
+                        'revenue': float(pred.predicted_revenue),
+                        'efficiency': float(pred.predicted_efficiency),
+                        'confidence': float(pred.confidence_score)
                     } for pred in predictions
                 ]
             })
