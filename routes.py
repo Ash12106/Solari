@@ -484,6 +484,79 @@ def get_chart_data(plant_id, chart_type):
 def not_found_error(error):
     return render_template('404.html'), 404
 
+@app.route('/api/weekly_analytics/<int:plant_id>')
+def get_weekly_analytics(plant_id):
+    """API endpoint to get weekly analytics data"""
+    try:
+        # Initialize analytics system
+        weekly_analytics = VVCEWeeklyAnalytics()
+        
+        # Get or generate weekly predictions
+        weekly_results = weekly_analytics.generate_weekly_predictions(plant_id, ml_predictor)
+        
+        if weekly_results:
+            # Generate insights based on actual data
+            insights = []
+            weekly_forecasts = weekly_results['weekly_forecasts']
+            
+            # Performance insights
+            high_performance_weeks = [w for w in weekly_forecasts if w['performance_score'] > 85]
+            if high_performance_weeks:
+                insights.append({
+                    'type': 'positive',
+                    'category': 'performance',
+                    'message': f'Excellent performance expected in {len(high_performance_weeks)} weeks',
+                    'action': 'Consider scheduling maintenance during lower-performance periods'
+                })
+            
+            # Peak day insights
+            peak_days = {}
+            for week in weekly_forecasts[:4]:  # First month
+                peak_day = week['peak_day']['date'].strftime('%A')
+                peak_days[peak_day] = peak_days.get(peak_day, 0) + 1
+            
+            if peak_days:
+                best_day = max(peak_days, key=peak_days.get)
+                insights.append({
+                    'type': 'info',
+                    'category': 'optimization',
+                    'message': f'Peak energy output most common on {best_day}s',
+                    'action': 'Schedule energy-intensive operations accordingly'
+                })
+            
+            # Generate risk factors
+            risk_factors = []
+            for week in weekly_results['weekly_forecasts']:
+                if week.get('risk_factors'):
+                    risk_factors.extend(week['risk_factors'])
+            
+            return jsonify({
+                'success': True,
+                'analytics': {
+                    'weekly_forecasts': weekly_results['weekly_forecasts'],
+                    'quarterly_analysis': weekly_results['quarterly_analysis'],
+                    'baseline_performance': weekly_results['baseline_performance'],
+                    'insights': insights,
+                    'risk_factors': risk_factors[:5]  # Top 5 risks
+                }
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'No analytics data available. Please train the model first.'
+            })
+            
+    except Exception as e:
+        logging.error(f"Error getting weekly analytics: {e}")
+        return jsonify({
+            'success': False,
+            'message': f'Error: {str(e)}'
+        })
+
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('404.html'), 404
+
 @app.errorhandler(500)
 def internal_error(error):
     db.session.rollback()
