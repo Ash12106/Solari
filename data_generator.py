@@ -15,28 +15,28 @@ def initialize_data():
         
         logging.info("Initializing sample data...")
         
-        # Create sample solar plants
+        # Create VVCE solar plant
         plants = [
             {
-                'name': 'Rajasthan Solar Park - Phase 1',
-                'location': 'Jaipur, Rajasthan',
-                'capacity_mw': 50.0,
+                'name': 'VVCE Solar Plant - Main Campus',
+                'location': 'Mysuru, Karnataka',
+                'capacity_mw': 1.5,
                 'panel_type': 'Monocrystalline',
-                'efficiency_rating': 20.5
+                'efficiency_rating': 20.8
             },
             {
-                'name': 'Gujarat Solar Farm',
-                'location': 'Ahmedabad, Gujarat',
-                'capacity_mw': 75.0,
+                'name': 'VVCE Solar Plant - Hostel Block',
+                'location': 'Mysuru, Karnataka',
+                'capacity_mw': 0.8,
                 'panel_type': 'Polycrystalline',
-                'efficiency_rating': 18.2
+                'efficiency_rating': 18.5
             },
             {
-                'name': 'Karnataka Solar Installation',
-                'location': 'Bangalore, Karnataka',
-                'capacity_mw': 25.0,
+                'name': 'VVCE Solar Plant - Academic Block',
+                'location': 'Mysuru, Karnataka',
+                'capacity_mw': 1.2,
                 'panel_type': 'Monocrystalline',
-                'efficiency_rating': 21.1
+                'efficiency_rating': 19.9
             }
         ]
         
@@ -46,7 +46,7 @@ def initialize_data():
                 name=plant_data['name'],
                 location=plant_data['location'],
                 capacity_mw=plant_data['capacity_mw'],
-                installation_date=date(2023, 6, 1),
+                installation_date=datetime(2023, 6, 1).date(),
                 panel_type=plant_data['panel_type'],
                 efficiency_rating=plant_data['efficiency_rating']
             )
