@@ -1,0 +1,556 @@
+/* Solar Energy ML Predictor - Custom Styles */
+
+:root {
+    /* Solar Energy Color Palette */
+    --solar-yellow: 255 193 7; /* #FFC107 */
+    --solar-orange: 255 152 0; /* #FF9800 */
+    --sky-blue: 0 123 255; /* #007BFF */
+    --energy-green: 40 167 69; /* #28A745 */
+    --cloud-gray: 108 117 125; /* #6C757D */
+    --sunny-gold: 255 235 59; /* #FFEB3B */
+    --panel-dark: 52 58 64; /* #343A40 */
+    
+    /* Indian Solar Theme Colors */
+    --primary-gradient: linear-gradient(135deg, rgb(var(--sky-blue)), rgb(var(--solar-yellow)));
+    --success-gradient: linear-gradient(135deg, rgb(var(--energy-green)), rgb(var(--sunny-gold)));
+    --warning-gradient: linear-gradient(135deg, rgb(var(--solar-orange)), rgb(var(--solar-yellow)));
+    --info-gradient: linear-gradient(135deg, rgb(var(--sky-blue)), rgb(var(--energy-green)));
+    
+    /* Spacing and Typography */
+    --border-radius: 8px;
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+}
+
+/* Global Styles */
+body {
+    background-color: hsl(210 11% 98%); /* #F8F9FA */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+}
+
+/* Navigation Enhancements */
+.navbar {
+    box-shadow: var(--box-shadow);
+    background: var(--primary-gradient) !important;
+}
+
+.navbar-brand {
+    font-weight: 600;
+    font-size: 1.5rem;
+}
+
+.navbar-nav .nav-link {
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.navbar-nav .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius);
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, 
+        rgba(var(--sky-blue), 0.1), 
+        rgba(var(--solar-yellow), 0.1));
+    border-radius: var(--border-radius);
+    margin-bottom: 2rem;
+}
+
+/* Stat Cards */
+.stat-card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    transition: var(--transition);
+    overflow: hidden;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+.stat-card.bg-primary {
+    background: var(--primary-gradient) !important;
+}
+
+.stat-card.bg-success {
+    background: var(--success-gradient) !important;
+}
+
+.stat-card.bg-info {
+    background: var(--info-gradient) !important;
+}
+
+.stat-card.bg-warning {
+    background: var(--warning-gradient) !important;
+}
+
+.stat-card .stat-icon {
+    opacity: 0.8;
+}
+
+/* Gradient Cards */
+.bg-gradient-primary {
+    background: var(--primary-gradient) !important;
+}
+
+.bg-gradient-success {
+    background: var(--success-gradient) !important;
+}
+
+.bg-gradient-info {
+    background: var(--info-gradient) !important;
+}
+
+.bg-gradient-warning {
+    background: var(--warning-gradient) !important;
+}
+
+/* Action Cards */
+.action-card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    transition: var(--transition);
+}
+
+.action-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Plant Cards */
+.plant-card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    transition: var(--transition);
+    border-left: 4px solid rgb(var(--solar-yellow));
+}
+
+.plant-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    border-left-color: rgb(var(--solar-orange));
+}
+
+/* Feature Cards */
+.feature-card {
+    padding: 2rem 1rem;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+.feature-card:hover {
+    background-color: rgba(var(--sky-blue), 0.05);
+    transform: translateY(-2px);
+}
+
+/* Sidebar */
+.sidebar {
+    background-color: hsl(210 11% 95%); /* #F1F3F4 */
+    min-height: calc(100vh - 200px);
+    padding: 1.5rem 1rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 2rem;
+}
+
+.plant-selector h5 {
+    color: rgb(var(--panel-dark));
+    border-bottom: 2px solid rgb(var(--solar-yellow));
+    padding-bottom: 0.5rem;
+}
+
+.list-group-item {
+    border: none;
+    border-radius: var(--border-radius);
+    margin-bottom: 0.5rem;
+    transition: var(--transition);
+}
+
+.list-group-item:hover {
+    background-color: rgba(var(--sky-blue), 0.1);
+    transform: translateX(5px);
+}
+
+.list-group-item.active {
+    background: var(--primary-gradient);
+    border-color: transparent;
+}
+
+/* Plant Header */
+.plant-header {
+    background: linear-gradient(135deg, 
+        rgba(var(--sky-blue), 0.1), 
+        rgba(var(--solar-yellow), 0.1));
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    border-left: 5px solid rgb(var(--solar-yellow));
+}
+
+/* Predictions Header */
+.predictions-header {
+    background: linear-gradient(135deg, 
+        rgba(var(--energy-green), 0.1), 
+        rgba(var(--sunny-gold), 0.1));
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    border-left: 5px solid rgb(var(--energy-green));
+}
+
+/* Summary Cards */
+.prediction-summary-card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    transition: var(--transition);
+}
+
+.prediction-summary-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Weather Cards */
+.weather-info .weather-item {
+    padding: 0.5rem;
+    border-radius: var(--border-radius);
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+.weather-forecast .forecast-day {
+    background-color: rgba(var(--sky-blue), 0.05);
+    transition: var(--transition);
+}
+
+.weather-forecast .forecast-day:hover {
+    background-color: rgba(var(--sky-blue), 0.1);
+    transform: translateX(5px);
+}
+
+/* Model Performance */
+.model-performance-card {
+    background: linear-gradient(135deg, 
+        rgba(var(--panel-dark), 0.05), 
+        rgba(var(--cloud-gray), 0.05));
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(var(--panel-dark), 0.1);
+}
+
+.metric-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.metric-label {
+    font-weight: 500;
+    color: rgb(var(--cloud-gray));
+}
+
+.metric-value {
+    font-weight: 600;
+    color: rgb(var(--panel-dark));
+}
+
+/* Cards Enhancement */
+.card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    transition: var(--transition);
+}
+
+.card:hover {
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    border-bottom: none;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    font-weight: 600;
+}
+
+.card-header.bg-primary {
+    background: var(--primary-gradient) !important;
+}
+
+.card-header.bg-success {
+    background: var(--success-gradient) !important;
+}
+
+.card-header.bg-info {
+    background: var(--info-gradient) !important;
+}
+
+.card-header.bg-warning {
+    background: var(--warning-gradient) !important;
+}
+
+.card-header.bg-dark {
+    background: linear-gradient(135deg, rgb(var(--panel-dark)), rgb(var(--cloud-gray))) !important;
+}
+
+.card-header.bg-secondary {
+    background: linear-gradient(135deg, rgb(var(--cloud-gray)), rgb(var(--panel-dark))) !important;
+}
+
+/* Buttons */
+.btn {
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    transition: var(--transition);
+    border: none;
+}
+
+.btn-primary {
+    background: var(--primary-gradient);
+    box-shadow: 0 2px 4px rgba(var(--sky-blue), 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(var(--sky-blue), 0.4);
+}
+
+.btn-success {
+    background: var(--success-gradient);
+    box-shadow: 0 2px 4px rgba(var(--energy-green), 0.3);
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(var(--energy-green), 0.4);
+}
+
+.btn-info {
+    background: var(--info-gradient);
+    box-shadow: 0 2px 4px rgba(var(--sky-blue), 0.3);
+}
+
+.btn-info:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(var(--sky-blue), 0.4);
+}
+
+.btn-warning {
+    background: var(--warning-gradient);
+    box-shadow: 0 2px 4px rgba(var(--solar-orange), 0.3);
+}
+
+.btn-warning:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(var(--solar-orange), 0.4);
+}
+
+/* Tables */
+.table {
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(var(--sky-blue), 0.03);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(var(--solar-yellow), 0.1);
+}
+
+.table-dark th {
+    background: linear-gradient(135deg, rgb(var(--panel-dark)), rgb(var(--cloud-gray)));
+}
+
+/* Progress Bars */
+.progress {
+    border-radius: var(--border-radius);
+    background-color: rgba(var(--cloud-gray), 0.2);
+}
+
+.progress-bar {
+    background: var(--success-gradient);
+    border-radius: var(--border-radius);
+}
+
+/* Badges */
+.badge {
+    border-radius: var(--border-radius);
+    font-weight: 500;
+}
+
+/* Alerts */
+.alert {
+    border: none;
+    border-radius: var(--border-radius);
+    border-left: 4px solid;
+}
+
+.alert-success {
+    background-color: rgba(var(--energy-green), 0.1);
+    border-left-color: rgb(var(--energy-green));
+    color: rgb(var(--energy-green));
+}
+
+.alert-danger {
+    background-color: rgba(220, 53, 69, 0.1);
+    border-left-color: #dc3545;
+    color: #dc3545;
+}
+
+.alert-warning {
+    background-color: rgba(var(--solar-orange), 0.1);
+    border-left-color: rgb(var(--solar-orange));
+    color: rgb(var(--solar-orange));
+}
+
+.alert-info {
+    background-color: rgba(var(--sky-blue), 0.1);
+    border-left-color: rgb(var(--sky-blue));
+    color: rgb(var(--sky-blue));
+}
+
+/* Footer */
+footer {
+    background: linear-gradient(135deg, rgb(var(--panel-dark)), rgb(var(--cloud-gray))) !important;
+    border-top: 3px solid rgb(var(--solar-yellow));
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .sidebar {
+        margin-bottom: 1rem;
+        min-height: auto;
+    }
+    
+    .plant-header,
+    .predictions-header {
+        padding: 1rem;
+    }
+    
+    .hero-section {
+        padding: 2rem 1rem !important;
+    }
+    
+    .stat-card {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Animation Classes */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-in {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(-20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* Loading Spinner */
+.spinner-border-lg {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Chart Container */
+.chart-container {
+    position: relative;
+    margin: auto;
+    height: 40vh;
+    width: 80vw;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: hsl(210 11% 95%);
+    border-radius: var(--border-radius);
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, rgb(var(--sky-blue)), rgb(var(--solar-yellow)));
+    border-radius: var(--border-radius);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, rgb(var(--solar-yellow)), rgb(var(--sky-blue)));
+}
+
+/* Solar Panel Icon Animation */
+.fa-solar-panel {
+    animation: solarGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes solarGlow {
+    from { color: rgb(var(--solar-yellow)); }
+    to { color: rgb(var(--solar-orange)); }
+}
+
+/* Energy Flow Animation */
+.energy-flow {
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(var(--solar-yellow), 0.5), 
+        transparent);
+    animation: energyFlow 2s linear infinite;
+}
+
+@keyframes energyFlow {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Status Indicators */
+.status-online {
+    color: rgb(var(--energy-green));
+}
+
+.status-warning {
+    color: rgb(var(--solar-orange));
+}
+
+.status-offline {
+    color: #dc3545;
+}
+
+/* Utility Classes */
+.text-solar {
+    color: rgb(var(--solar-yellow)) !important;
+}
+
+.text-energy {
+    color: rgb(var(--energy-green)) !important;
+}
+
+.text-sky {
+    color: rgb(var(--sky-blue)) !important;
+}
+
+.bg-solar {
+    background-color: rgba(var(--solar-yellow), 0.1) !important;
+}
+
+.border-solar {
+    border-color: rgb(var(--solar-yellow)) !important;
+}
+
+.shadow-solar {
+    box-shadow: 0 4px 6px rgba(var(--solar-yellow), 0.3) !important;
+}

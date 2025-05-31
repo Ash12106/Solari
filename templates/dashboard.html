@@ -1,0 +1,394 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Solar Energy ML Predictor{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <div class="plant-selector">
+                <h5 class="mb-3">
+                    <i class="fas fa-solar-panel me-2"></i>
+                    Select Plant
+                </h5>
+                <div class="list-group">
+                    {% for p in all_plants %}
+                    <a href="{{ url_for('dashboard', plant_id=p.id) }}" 
+                       class="list-group-item list-group-item-action {% if p.id == plant.id %}active{% endif %}">
+                        <strong>{{ p.name }}</strong>
+                        <br>
+                        <small class="text-muted">{{ p.location }}</small>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10">
+            <!-- Plant Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="plant-header">
+                        <h1 class="mb-2">
+                            <i class="fas fa-solar-panel text-warning me-2"></i>
+                            {{ plant.name }}
+                        </h1>
+                        <p class="text-muted mb-3">
+                            <i class="fas fa-map-marker-alt me-1"></i>{{ plant.location }}
+                            | <i class="fas fa-bolt me-1"></i>{{ plant.capacity_mw }} MW Capacity
+                            | <i class="fas fa-calendar me-1"></i>Installed: {{ plant.installation_date.strftime('%B %Y') }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="card stat-card bg-gradient-primary text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="mb-0">{{ '{:.1f}'.format(current_efficiency or 0) }}%</h4>
+                                    <p class="mb-0">Current Efficiency</p>
+                                </div>
+                                <i class="fas fa-tachometer-alt fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3 mb-3">
+                    <div class="card stat-card bg-gradient-success text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="mb-0">{{ '{:.1f}'.format(current_weather.temperature if current_weather else 0) }}°C</h4>
+                                    <p class="mb-0">Temperature</p>
+                                </div>
+                                <i class="fas fa-thermometer-half fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3 mb-3">
+                    <div class="card stat-card bg-gradient-info text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="mb-0">{{ '{:.1f}'.format(current_weather.solar_irradiance if current_weather else 0) }}</h4>
+                                    <p class="mb-0">Solar Irradiance</p>
+                                </div>
+                                <i class="fas fa-sun fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3 mb-3">
+                    <div class="card stat-card bg-gradient-warning text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="mb-0">{{ '{:.1f}'.format(current_weather.cloud_cover if current_weather else 0) }}%</h4>
+                                    <p class="mb-0">Cloud Cover</p>
+                                </div>
+                                <i class="fas fa-cloud fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="row mb-4">
+                <!-- Energy Production Chart -->
+                <div class="col-lg-8 mb-4">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-line me-2"></i>
+                                Energy Production (Last 30 Days)
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="productionChart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Weather Impact -->
+                <div class="col-lg-4 mb-4">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-cloud-sun me-2"></i>
+                                Current Weather
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if current_weather %}
+                            <div class="weather-info">
+                                <div class="weather-item mb-3">
+                                    <i class="fas fa-thermometer-half text-danger me-2"></i>
+                                    <strong>Temperature:</strong> {{ current_weather.temperature }}°C
+                                </div>
+                                <div class="weather-item mb-3">
+                                    <i class="fas fa-tint text-primary me-2"></i>
+                                    <strong>Humidity:</strong> {{ current_weather.humidity }}%
+                                </div>
+                                <div class="weather-item mb-3">
+                                    <i class="fas fa-wind text-info me-2"></i>
+                                    <strong>Wind Speed:</strong> {{ '{:.1f}'.format(current_weather.wind_speed) }} km/h
+                                </div>
+                                <div class="weather-item mb-3">
+                                    <i class="fas fa-sun text-warning me-2"></i>
+                                    <strong>Solar Irradiance:</strong> {{ '{:.1f}'.format(current_weather.solar_irradiance) }} kWh/m²
+                                </div>
+                                <div class="weather-description">
+                                    <small class="text-muted">{{ current_weather.description.title() }}</small>
+                                    {% if current_weather.get('fallback') %}
+                                    <br><small class="text-warning">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                        Using fallback data
+                                    </small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% else %}
+                            <p class="text-muted">Weather data unavailable</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Revenue and Efficiency -->
+            <div class="row mb-4">
+                <div class="col-lg-6 mb-4">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-rupee-sign me-2"></i>
+                                Revenue Trend (INR)
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="revenueChart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 mb-4">
+                    <div class="card">
+                        <div class="card-header bg-warning text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-percentage me-2"></i>
+                                Equipment Efficiency
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="efficiencyChart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Model Performance -->
+            {% if model_performance %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-dark text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-brain me-2"></i>
+                                ML Model Performance
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                {% for performance in model_performance %}
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <div class="model-performance-card">
+                                        <h6 class="text-primary">{{ performance.model_name }}</h6>
+                                        <div class="metrics">
+                                            <div class="metric-item">
+                                                <span class="metric-label">R² Score:</span>
+                                                <span class="metric-value">{{ '{:.3f}'.format(performance.r2_score) }}</span>
+                                            </div>
+                                            <div class="metric-item">
+                                                <span class="metric-label">RMSE:</span>
+                                                <span class="metric-value">{{ '{:.2f}'.format(performance.rmse) }}</span>
+                                            </div>
+                                            <div class="metric-item">
+                                                <span class="metric-label">MAE:</span>
+                                                <span class="metric-value">{{ '{:.2f}'.format(performance.mae) }}</span>
+                                            </div>
+                                        </div>
+                                        <small class="text-muted">
+                                            Trained: {{ performance.training_date.strftime('%Y-%m-%d') }}
+                                        </small>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Action Buttons -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex flex-wrap gap-3">
+                                <button class="btn btn-primary" onclick="trainModel({{ plant.id }})">
+                                    <i class="fas fa-cog me-2"></i>
+                                    Retrain Model
+                                </button>
+                                <button class="btn btn-success" onclick="generatePredictions({{ plant.id }})">
+                                    <i class="fas fa-crystal-ball me-2"></i>
+                                    Generate Predictions
+                                </button>
+                                <a href="{{ url_for('predictions', plant_id=plant.id) }}" class="btn btn-info">
+                                    <i class="fas fa-chart-bar me-2"></i>
+                                    View 6-Month Predictions
+                                </a>
+                                <button class="btn btn-warning" onclick="refreshWeather({{ plant.id }})">
+                                    <i class="fas fa-sync-alt me-2"></i>
+                                    Refresh Weather
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Processing...</h5>
+            </div>
+            <div class="modal-body text-center">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p id="loadingMessage">Please wait...</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+// Initialize charts when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCharts({{ plant.id }});
+});
+
+function trainModel(plantId) {
+    showLoadingModal('Training ML model with historical data...');
+    
+    fetch(`/api/train_model/${plantId}`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoadingModal();
+        if (data.success) {
+            showAlert('success', 'Model trained successfully! New predictions generated.');
+            location.reload();
+        } else {
+            showAlert('danger', 'Training failed: ' + data.message);
+        }
+    })
+    .catch(error => {
+        hideLoadingModal();
+        showAlert('danger', 'Training failed due to network error');
+    });
+}
+
+function generatePredictions(plantId) {
+    showLoadingModal('Generating 6-month predictions...');
+    
+    fetch(`/api/generate_predictions/${plantId}`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoadingModal();
+        if (data.success) {
+            showAlert('success', `Generated ${data.predictions_count} predictions successfully!`);
+        } else {
+            showAlert('danger', 'Prediction generation failed: ' + data.message);
+        }
+    })
+    .catch(error => {
+        hideLoadingModal();
+        showAlert('danger', 'Prediction generation failed due to network error');
+    });
+}
+
+function refreshWeather(plantId) {
+    showLoadingModal('Refreshing weather data...');
+    
+    fetch(`/api/weather/${plantId}`)
+    .then(response => response.json())
+    .then(data => {
+        hideLoadingModal();
+        if (data.success) {
+            showAlert('success', 'Weather data refreshed successfully!');
+            location.reload();
+        } else {
+            showAlert('warning', 'Weather refresh failed: ' + data.message);
+        }
+    })
+    .catch(error => {
+        hideLoadingModal();
+        showAlert('warning', 'Weather refresh failed due to network error');
+    });
+}
+
+function showLoadingModal(message) {
+    document.getElementById('loadingMessage').textContent = message;
+    const modal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    modal.show();
+}
+
+function hideLoadingModal() {
+    const modal = bootstrap.Modal.getInstance(document.getElementById('loadingModal'));
+    if (modal) {
+        modal.hide();
+    }
+}
+
+function showAlert(type, message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const container = document.querySelector('.container-fluid');
+    container.insertBefore(alertDiv, container.firstChild);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 5000);
+}
+</script>
+{% endblock %}

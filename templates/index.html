@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Solar Energy ML Predictor{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="hero-section text-center py-5">
+                <h1 class="display-4 text-primary mb-4">
+                    <i class="fas fa-solar-panel me-3"></i>
+                    Solar Energy ML Predictor
+                </h1>
+                <p class="lead mb-4">
+                    Advanced machine learning predictions for solar energy plants across India
+                </p>
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <p class="text-muted">
+                            Harness the power of artificial intelligence to optimize your solar energy operations.
+                            Get accurate 6-month forecasts, real-time monitoring, and financial analytics
+                            tailored for the Indian solar energy market.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-5">
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h3 class="card-title mb-0">{{ stats.total_plants or 0 }}</h3>
+                            <p class="card-text">Solar Plants</p>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-industry fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h3 class="card-title mb-0">{{ stats.total_capacity or 0 }}</h3>
+                            <p class="card-text">MW Capacity</p>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-bolt fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h3 class="card-title mb-0">{{ '{:,.0f}'.format(stats.recent_production or 0) }}</h3>
+                            <p class="card-text">kWh (30 days)</p>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-chart-line fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h3 class="card-title mb-0">₹{{ '{:,.0f}'.format(stats.recent_revenue or 0) }}</h3>
+                            <p class="card-text">Revenue (30 days)</p>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-rupee-sign fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="mb-4">Quick Actions</h2>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card action-card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-line fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">View Dashboard</h5>
+                    <p class="card-text">Monitor real-time performance and analytics</p>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Open Dashboard</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card action-card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-crystal-ball fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">6-Month Predictions</h5>
+                    <p class="card-text">AI-powered forecasts for energy and revenue</p>
+                    <a href="{{ url_for('predictions') }}" class="btn btn-success">View Predictions</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card action-card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-cog fa-3x text-info mb-3"></i>
+                    <h5 class="card-title">Train ML Model</h5>
+                    <p class="card-text">Update models with latest data</p>
+                    <button class="btn btn-info" onclick="trainModel()">Train Model</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Plant Selection -->
+    {% if plants %}
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="mb-4">Solar Plants</h2>
+        </div>
+        
+        {% for plant in plants %}
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card plant-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-solar-panel text-warning me-2"></i>
+                        {{ plant.name }}
+                    </h5>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            <i class="fas fa-map-marker-alt me-1"></i>{{ plant.location }}
+                        </small>
+                    </p>
+                    <ul class="list-unstyled">
+                        <li><strong>Capacity:</strong> {{ plant.capacity_mw }} MW</li>
+                        <li><strong>Panel Type:</strong> {{ plant.panel_type }}</li>
+                        <li><strong>Efficiency:</strong> {{ plant.efficiency_rating }}%</li>
+                    </ul>
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('dashboard', plant_id=plant.id) }}" class="btn btn-primary btn-sm">
+                            View Dashboard
+                        </a>
+                        <a href="{{ url_for('predictions', plant_id=plant.id) }}" class="btn btn-outline-primary btn-sm">
+                            View Predictions
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Features Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="mb-4">Key Features</h2>
+        </div>
+        
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="feature-card text-center">
+                <i class="fas fa-brain fa-3x text-primary mb-3"></i>
+                <h5>Machine Learning</h5>
+                <p class="text-muted">Advanced ML models for accurate predictions</p>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="feature-card text-center">
+                <i class="fas fa-cloud-sun fa-3x text-info mb-3"></i>
+                <h5>Weather Integration</h5>
+                <p class="text-muted">Real-time weather data and forecasts</p>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="feature-card text-center">
+                <i class="fas fa-rupee-sign fa-3x text-success mb-3"></i>
+                <h5>Indian Standards</h5>
+                <p class="text-muted">Compliant with Indian solar regulations</p>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="feature-card text-center">
+                <i class="fas fa-mobile-alt fa-3x text-warning mb-3"></i>
+                <h5>Mobile Responsive</h5>
+                <p class="text-muted">Access from any device, anywhere</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Training Modal -->
+<div class="modal fade" id="trainingModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Training ML Model</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Training machine learning models with historical data...</p>
+                    <p class="text-muted">This may take a few moments.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function trainModel() {
+    const modal = new bootstrap.Modal(document.getElementById('trainingModal'));
+    modal.show();
+    
+    // Get first plant ID (simplified for demo)
+    {% if plants %}
+    const plantId = {{ plants[0].id }};
+    {% else %}
+    const plantId = 1;
+    {% endif %}
+    
+    fetch(`/api/train_model/${plantId}`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        modal.hide();
+        if (data.success) {
+            alert('Model trained successfully! Predictions have been generated.');
+        } else {
+            alert('Training failed: ' + data.message);
+        }
+    })
+    .catch(error => {
+        modal.hide();
+        console.error('Error:', error);
+        alert('Training failed due to network error');
+    });
+}
+</script>
+{% endblock %}
