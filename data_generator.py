@@ -1,42 +1,57 @@
 import random
 import numpy as np
 from datetime import datetime, timedelta, date
-from models import SolarPlant, WeatherData, EnergyProduction, MaintenanceRecord
+from models import SolarPlant, WeatherData, EnergyProduction, MaintenanceRecord, MLPrediction, ModelPerformance
 from app import db
 import logging
 
 def initialize_data():
     """Initialize the database with sample data if it's empty"""
     try:
-        # Check if data already exists
-        if SolarPlant.query.first():
-            logging.info("Data already exists, skipping initialization")
+        # Check if VVCE data already exists
+        vvce_plants = SolarPlant.query.filter(SolarPlant.name.like('%VVCE%')).count()
+        if vvce_plants >= 5:
+            logging.info("VVCE plants already exist, skipping initialization")
             return
         
         logging.info("Initializing sample data...")
         
-        # Create VVCE solar plant
+        # Create VVCE solar plants in different college blocks
         plants = [
             {
-                'name': 'VVCE Solar Plant - Main Campus',
+                'name': 'VVCE Administrative Block Solar Plant',
                 'location': 'Mysuru, Karnataka',
                 'capacity_mw': 1.5,
                 'panel_type': 'Monocrystalline',
                 'efficiency_rating': 20.8
             },
             {
-                'name': 'VVCE Solar Plant - Hostel Block',
+                'name': 'VVCE Boys Hostel Block Solar Plant',
                 'location': 'Mysuru, Karnataka',
                 'capacity_mw': 0.8,
                 'panel_type': 'Polycrystalline',
                 'efficiency_rating': 18.5
             },
             {
-                'name': 'VVCE Solar Plant - Academic Block',
+                'name': 'VVCE Engineering Block Solar Plant',
                 'location': 'Mysuru, Karnataka',
                 'capacity_mw': 1.2,
                 'panel_type': 'Monocrystalline',
                 'efficiency_rating': 19.9
+            },
+            {
+                'name': 'VVCE Library Block Solar Plant',
+                'location': 'Mysuru, Karnataka',
+                'capacity_mw': 0.6,
+                'panel_type': 'Monocrystalline',
+                'efficiency_rating': 21.2
+            },
+            {
+                'name': 'VVCE Cafeteria Block Solar Plant',
+                'location': 'Mysuru, Karnataka',
+                'capacity_mw': 0.4,
+                'panel_type': 'Polycrystalline',
+                'efficiency_rating': 17.8
             }
         ]
         
@@ -207,7 +222,7 @@ def calculate_energy_production(plant, weather, date):
     peak_sun_hours = weather['solar_irradiance']  # Simplified: irradiance = peak sun hours
     
     # Equipment efficiency (starts at rated efficiency, degrades over time)
-    days_since_installation = (date - date(2023, 6, 1)).days
+    days_since_installation = (date - datetime(2023, 6, 1).date()).days
     degradation_factor = 1 - (days_since_installation * 0.0002)  # 0.02% per day
     equipment_efficiency = plant.efficiency_rating * degradation_factor
     
