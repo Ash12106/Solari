@@ -1,0 +1,199 @@
+# Solar Energy Plant ML Prediction System - Replit AI Prompt
+
+## Project Overview
+Create a comprehensive web-based machine learning system for predicting solar energy plant efficiency, productivity, and profitability for the next 6 months using Indian standards and currency. The system should learn from 6 months of historical data to improve prediction accuracy.
+
+## Core Requirements
+
+### 1. Machine Learning Model
+- **Framework**: Use scikit-learn, TensorFlow, or PyTorch for ML models
+- **Model Types**: Implement multiple models (Random Forest, XGBoost, LSTM for time series)
+- **Training Data**: Generate or use 6 months of synthetic historical data including:
+  - Daily solar irradiance (kWh/m²/day)
+  - Temperature (°C)
+  - Humidity (%)
+  - Cloud cover (%)
+  - Wind speed (km/h)
+  - Energy production (kWh)
+  - Equipment efficiency (%)
+  - Maintenance records
+  - Financial data in INR
+
+### 2. Indian Standards & Currency
+- **Currency**: All financial calculations in Indian Rupees (₹)
+- **Energy Units**: Use Indian standards (kWh, MW)
+- **Weather Data**: Focus on Indian climate patterns
+- **Electricity Pricing**: Use Indian solar tariff rates (₹3-6 per kWh)
+- **Location**: Default to major Indian solar regions (Rajasthan, Gujarat, Karnataka)
+
+### 3. Web Application Structure
+```
+solar-ml-predictor/
+├── app.py (Flask/FastAPI main application)
+├── models/
+│   ├── ml_models.py (ML model classes)
+│   ├── data_preprocessing.py
+│   └── prediction_engine.py
+├── data/
+│   ├── historical_data.csv
+│   ├── weather_data.csv
+│   └── maintenance_logs.csv
+├── static/
+│   ├── css/style.css
+│   ├── js/dashboard.js
+│   └── js/charts.js
+├── templates/
+│   ├── index.html
+│   ├── dashboard.html
+│   └── predictions.html
+├── api/
+│   ├── weather_api.py
+│   └── data_api.py
+└── requirements.txt
+```
+
+### 4. Weather API Integration
+- **Primary**: OpenWeatherMap API (free tier)
+- **Secondary**: WeatherAPI.com (free tier)
+- **Backup**: Visual Crossing Weather API (free tier)
+- **Features**: 
+  - Real-time weather data
+  - 7-day weather forecast
+  - Historical weather data
+  - Solar radiation data
+
+### 5. Dashboard Features
+- **Real-time Monitoring**: Current plant status and efficiency
+- **Prediction Charts**: 6-month forecasts with confidence intervals
+- **Financial Dashboard**: Revenue, profit, ROI calculations in INR
+- **Maintenance Scheduler**: Service renewal tracking and alerts
+- **Weather Integration**: Live weather impact on predictions
+- **Performance Metrics**: Accuracy scores, model performance
+
+### 6. Key Components to Implement
+
+#### Backend (Python Flask/FastAPI)
+```python
+# Example structure
+class SolarMLPredictor:
+    def __init__(self):
+        self.weather_api = WeatherAPI()
+        self.ml_model = SolarEfficiencyModel()
+        self.financial_model = ProfitPredictor()
+    
+    def train_model(self, historical_data):
+        # Train on 6 months historical data
+        pass
+    
+    def predict_6_months(self, current_conditions):
+        # Generate 6-month predictions
+        pass
+    
+    def calculate_indian_financials(self, energy_data):
+        # Calculate in INR with Indian tariffs
+        pass
+```
+
+#### Frontend (HTML/CSS/JavaScript)
+- **Charts**: Use Chart.js or Plotly.js for interactive visualizations
+- **UI Framework**: Bootstrap or Tailwind CSS for responsive design
+- **Real-time Updates**: WebSocket or AJAX for live data updates
+
+### 7. Machine Learning Pipeline
+```python
+# Data preprocessing
+- Weather normalization for Indian climate
+- Seasonal adjustments (Monsoon, Summer, Winter)
+- Equipment degradation modeling
+- Maintenance cycle optimization
+
+# Feature Engineering
+- Moving averages for weather patterns
+- Seasonal indicators
+- Equipment age factors
+- Maintenance interval features
+
+# Model Training
+- Train/validation split (80/20)
+- Cross-validation for robustness
+- Hyperparameter tuning
+- Model ensemble for better accuracy
+```
+
+### 8. Indian Solar Industry Specifications
+- **Panel Types**: Monocrystalline, Polycrystalline (common in India)
+- **Efficiency Rates**: 15-22% (typical Indian solar panels)
+- **Degradation**: 0.5-0.8% per year
+- **Maintenance**: Quarterly cleaning, annual servicing
+- **Grid Connection**: Indian grid standards and regulations
+- **Subsidies**: Include MNRE subsidy calculations
+
+### 9. Free APIs and Resources to Integrate
+- **Weather**: OpenWeatherMap, WeatherAPI.com
+- **Solar Data**: NREL Solar Radiation Database
+- **Financial**: RBI exchange rates API
+- **Location**: Google Geocoding API (free tier)
+- **Energy Data**: Open Government Data Platform India
+
+### 10. Advanced Features
+- **Predictive Maintenance**: ML-based equipment failure prediction
+- **Optimization Engine**: Suggest optimal maintenance schedules
+- **Alerts System**: Email/SMS notifications for critical issues
+- **Export Reports**: PDF reports with predictions and analysis
+- **Mobile Responsive**: Works on tablets and smartphones
+
+### 11. Data Visualization Requirements
+- **Interactive Charts**: Plotly or Chart.js
+- **Graphs Needed**:
+  - Daily/Monthly energy production trends
+  - Weather impact correlations
+  - Profit/loss projections (INR)
+  - Equipment efficiency over time
+  - Maintenance cost analysis
+  - ROI and payback period charts
+  - Seasonal performance patterns
+
+### 12. GitHub Integration
+- **Reference Repositories**:
+  - Solar prediction models on GitHub
+  - Time series forecasting examples
+  - Indian weather data projects
+  - Energy efficiency calculators
+
+### 13. Deployment Configuration
+- **Environment**: Set up for Replit deployment
+- **Database**: SQLite for development, PostgreSQL for production
+- **Caching**: Redis for API response caching
+- **Logging**: Comprehensive logging for debugging
+
+### 14. Sample Data Generation
+Generate realistic 6-month historical data including:
+- Weather patterns typical to Indian regions
+- Solar plant performance data
+- Maintenance schedules and costs
+- Financial records in INR
+- Seasonal variations (Monsoon impact, dust storms, etc.)
+
+### 15. Performance Metrics
+- **Model Accuracy**: RMSE, MAE, R² scores
+- **Business Metrics**: Prediction accuracy for revenue forecasts
+- **System Performance**: API response times, dashboard load speeds
+
+## Implementation Priority
+1. Set up Flask/FastAPI backend with basic ML model
+2. Integrate weather APIs and generate sample data
+3. Build core prediction engine
+4. Create responsive dashboard with charts
+5. Implement Indian currency and standards
+6. Add advanced ML features and optimization
+7. Deploy and test with real-world scenarios
+
+## Expected Deliverables
+- Fully functional web application
+- Trained ML model with 85%+ accuracy
+- Interactive dashboard with real-time data
+- 6-month prediction capability
+- Indian standards compliance
+- Comprehensive documentation
+
+Create this as a production-ready application with proper error handling, security measures, and scalable architecture suitable for real solar energy companies in India.
