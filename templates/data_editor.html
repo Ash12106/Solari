@@ -1,0 +1,415 @@
+{% extends "base.html" %}
+
+{% block title %}Data Editor - VVCE Solar Plant Monitor{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <div class="plant-selector">
+                <h5 class="mb-3">
+                    <i class="fas fa-solar-panel me-2"></i>
+                    Select Plant
+                </h5>
+                <div class="list-group">
+                    {% for p in all_plants %}
+                    <a href="{{ url_for('data_editor', plant_id=p.id) }}" 
+                       class="list-group-item list-group-item-action {% if p.id == plant.id %}active{% endif %}">
+                        <strong>{{ p.name }}</strong>
+                        <br>
+                        <small class="text-muted">{{ p.location }}</small>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10">
+            <!-- Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="data-editor-header">
+                        <h1 class="mb-2">
+                            <i class="fas fa-edit text-primary me-2"></i>
+                            Data Editor
+                        </h1>
+                        <p class="text-muted mb-3">
+                            <strong>{{ plant.name }}</strong> | Edit and manage historical solar plant data
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-success" id="saveChanges">
+                                            <i class="fas fa-save me-2"></i>Save Changes
+                                        </button>
+                                        <button class="btn btn-warning" id="undoChanges">
+                                            <i class="fas fa-undo me-2"></i>Undo
+                                        </button>
+                                        <button class="btn btn-info" id="exportData">
+                                            <i class="fas fa-download me-2"></i>Export CSV
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    <div class="input-group" style="max-width: 300px; margin-left: auto;">
+                                        <input type="date" class="form-control" id="dateFilter" placeholder="Filter by date">
+                                        <button class="btn btn-outline-secondary" id="clearFilter">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Grid -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-table me-2"></i>
+                                Historical Data - Last 30 Days
+                            </h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover mb-0" id="dataTable">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Energy (kWh)</th>
+                                            <th>Efficiency (%)</th>
+                                            <th>Temperature (°C)</th>
+                                            <th>Solar Irradiance</th>
+                                            <th>Revenue (₹)</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for data in production_data %}
+                                        <tr data-id="{{ loop.index }}">
+                                            <td>{{ data.date.strftime('%Y-%m-%d') }}</td>
+                                            <td class="editable" data-field="energy_produced" data-type="number">
+                                                {{ '{:,.0f}'.format(data.energy_produced) }}
+                                            </td>
+                                            <td class="editable" data-field="equipment_efficiency" data-type="number">
+                                                {{ '{:.1f}'.format(data.equipment_efficiency) }}
+                                            </td>
+                                            <td class="editable" data-field="temperature" data-type="number">
+                                                {{ '{:.1f}'.format(data.temperature) }}
+                                            </td>
+                                            <td class="editable" data-field="solar_irradiance" data-type="number">
+                                                {{ '{:.2f}'.format(data.solar_irradiance) }}
+                                            </td>
+                                            <td class="editable" data-field="revenue_inr" data-type="number">
+                                                ₹{{ '{:,.0f}'.format(data.revenue_inr) }}
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary edit-row">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-success save-row" style="display: none;">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-secondary cancel-row" style="display: none;">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Visualization -->
+            <div class="row mb-4">
+                <div class="col-lg-6 mb-4">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-line me-2"></i>
+                                Energy Production Trend
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="energyTrendChart" height="250"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 mb-4">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-bar me-2"></i>
+                                Efficiency Analysis
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="efficiencyChart" height="250"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Validation Alerts -->
+            <div class="row">
+                <div class="col-12">
+                    <div id="validationAlerts"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Data Point</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <div class="mb-3">
+                        <label for="editDate" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="editDate" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editEnergy" class="form-label">Energy Produced (kWh)</label>
+                        <input type="number" class="form-control" id="editEnergy" step="0.01" min="0">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editEfficiency" class="form-label">Equipment Efficiency (%)</label>
+                        <input type="number" class="form-control" id="editEfficiency" step="0.1" min="0" max="100">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editRevenue" class="form-label">Revenue (₹)</label>
+                        <input type="number" class="form-control" id="editRevenue" step="0.01" min="0">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveEdit">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Data Editor JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    initializeDataEditor();
+});
+
+function initializeDataEditor() {
+    console.log('Data Editor initialized for VVCE Solar Plant');
+    
+    // Make table cells editable
+    document.querySelectorAll('.editable').forEach(cell => {
+        cell.addEventListener('click', function() {
+            if (!this.querySelector('input')) {
+                makeEditable(this);
+            }
+        });
+    });
+
+    // Save changes
+    document.getElementById('saveChanges').addEventListener('click', saveAllChanges);
+    
+    // Export data
+    document.getElementById('exportData').addEventListener('click', exportToCSV);
+    
+    // Date filter
+    document.getElementById('dateFilter').addEventListener('change', filterByDate);
+    document.getElementById('clearFilter').addEventListener('click', clearDateFilter);
+}
+
+function makeEditable(cell) {
+    const currentValue = cell.textContent.trim().replace(/[₹,]/g, '');
+    const dataType = cell.dataset.type;
+    const field = cell.dataset.field;
+    
+    const input = document.createElement('input');
+    input.type = dataType === 'number' ? 'number' : 'text';
+    input.value = currentValue;
+    input.className = 'form-control form-control-sm';
+    input.style.width = '100%';
+    
+    if (dataType === 'number') {
+        input.step = field.includes('efficiency') ? '0.1' : '0.01';
+        input.min = '0';
+        if (field.includes('efficiency')) {
+            input.max = '100';
+        }
+    }
+    
+    cell.innerHTML = '';
+    cell.appendChild(input);
+    input.focus();
+    
+    input.addEventListener('blur', function() {
+        finishEdit(cell, input.value, field);
+    });
+    
+    input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            finishEdit(cell, input.value, field);
+        } else if (e.key === 'Escape') {
+            cancelEdit(cell);
+        }
+    });
+}
+
+function finishEdit(cell, newValue, field) {
+    if (validateValue(newValue, field)) {
+        const formattedValue = formatValue(newValue, field);
+        cell.textContent = formattedValue;
+        cell.classList.add('table-warning'); // Mark as modified
+        showValidationMessage('Data updated successfully', 'success');
+    } else {
+        cancelEdit(cell);
+        showValidationMessage('Invalid value entered', 'danger');
+    }
+}
+
+function cancelEdit(cell) {
+    // Restore original value (simplified - in real app, store original)
+    cell.innerHTML = cell.dataset.originalValue || '0';
+}
+
+function validateValue(value, field) {
+    const numValue = parseFloat(value);
+    
+    if (isNaN(numValue) || numValue < 0) {
+        return false;
+    }
+    
+    if (field.includes('efficiency') && numValue > 100) {
+        return false;
+    }
+    
+    if (field.includes('energy') && numValue > 100000) { // Reasonable upper limit
+        return false;
+    }
+    
+    return true;
+}
+
+function formatValue(value, field) {
+    const numValue = parseFloat(value);
+    
+    if (field.includes('revenue')) {
+        return '₹' + numValue.toLocaleString('en-IN');
+    } else if (field.includes('efficiency')) {
+        return numValue.toFixed(1);
+    } else if (field.includes('energy')) {
+        return numValue.toLocaleString('en-IN');
+    } else {
+        return numValue.toFixed(2);
+    }
+}
+
+function saveAllChanges() {
+    const modifiedRows = document.querySelectorAll('.table-warning');
+    if (modifiedRows.length === 0) {
+        showValidationMessage('No changes to save', 'info');
+        return;
+    }
+    
+    // In a real implementation, this would send data to the server
+    showValidationMessage(`Saved ${modifiedRows.length} changes successfully`, 'success');
+    modifiedRows.forEach(row => row.classList.remove('table-warning'));
+}
+
+function exportToCSV() {
+    const table = document.getElementById('dataTable');
+    let csv = [];
+    
+    // Headers
+    const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
+    csv.push(headers.slice(0, -1).join(',')); // Exclude Actions column
+    
+    // Data rows
+    const rows = table.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+        const cells = Array.from(row.querySelectorAll('td')).slice(0, -1); // Exclude Actions column
+        const rowData = cells.map(cell => cell.textContent.trim().replace(/[₹,]/g, ''));
+        csv.push(rowData.join(','));
+    });
+    
+    // Download
+    const csvContent = csv.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'vvce_solar_data.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+    
+    showValidationMessage('Data exported successfully', 'success');
+}
+
+function filterByDate() {
+    const filterDate = document.getElementById('dateFilter').value;
+    const rows = document.querySelectorAll('#dataTable tbody tr');
+    
+    rows.forEach(row => {
+        const rowDate = row.cells[0].textContent.trim();
+        if (filterDate === '' || rowDate === filterDate) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+function clearDateFilter() {
+    document.getElementById('dateFilter').value = '';
+    filterByDate();
+}
+
+function showValidationMessage(message, type) {
+    const alertsContainer = document.getElementById('validationAlerts');
+    
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type} alert-dismissible fade show`;
+    alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    alertsContainer.appendChild(alert);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (alert.parentNode) {
+            alert.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

@@ -166,14 +166,15 @@ class WeatherAPI:
     def get_location_coordinates(self, city, state=""):
         """Get coordinates for a city (for Indian locations)"""
         indian_cities = {
+            'mysuru': (12.2958, 76.6394),
+            'mysore': (12.2958, 76.6394),
+            'bangalore': (12.9716, 77.5946),
             'jaipur': (26.9124, 75.7873),
             'jodhpur': (26.2389, 73.0243),
             'bikaner': (28.0229, 73.3119),
             'ahmedabad': (23.0225, 72.5714),
             'gandhinagar': (23.2156, 72.6369),
             'rajkot': (22.3039, 70.8022),
-            'bangalore': (12.9716, 77.5946),
-            'mysore': (12.2958, 76.6394),
             'hubli': (15.3647, 75.1240),
             'chennai': (13.0827, 80.2707),
             'coimbatore': (11.0168, 76.9558),
@@ -189,9 +190,9 @@ class WeatherAPI:
         if city_lower in indian_cities:
             return indian_cities[city_lower]
         else:
-            # Default to Jaipur (major solar region)
-            logging.warning(f"City {city} not found, defaulting to Jaipur")
-            return indian_cities['jaipur']
+            # Default to Mysuru for VVCE
+            logging.warning(f"City {city} not found, defaulting to Mysuru")
+            return indian_cities['mysuru']
 
 # Global weather API instance
 weather_api = WeatherAPI()
