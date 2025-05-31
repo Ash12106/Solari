@@ -168,6 +168,43 @@ def data_editor(plant_id=None):
         flash('Error loading data editor', 'error')
         return redirect(url_for('index'))
 
+@app.route('/api/save_data/<int:plant_id>', methods=['POST'])
+def save_data_edits(plant_id):
+    """API endpoint to save data edits"""
+    try:
+        data = request.get_json()
+        
+        for row in data:
+            # Find the energy production record
+            production = EnergyProduction.query.filter_by(
+                plant_id=plant_id,
+                date=datetime.strptime(row['date'], '%Y-%m-%d').date()
+            ).first()
+            
+            if production:
+                # Update energy production data
+                production.energy_produced = float(row['energy_produced'])
+                production.equipment_efficiency = float(row['equipment_efficiency'])
+                production.revenue_inr = float(row['revenue_inr'])
+                
+                # Update corresponding weather data
+                weather = WeatherData.query.filter_by(
+                    plant_id=plant_id,
+                    date=production.date
+                ).first()
+                
+                if weather:
+                    weather.temperature = float(row['temperature'])
+                    weather.solar_irradiance = float(row['solar_irradiance'])
+        
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Data saved successfully'})
+        
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error saving data edits: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @app.route('/predictions')
 @app.route('/predictions/<int:plant_id>')
 def predictions(plant_id=None):

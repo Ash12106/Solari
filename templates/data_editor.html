@@ -339,9 +339,43 @@ function saveAllChanges() {
         return;
     }
     
-    // In a real implementation, this would send data to the server
-    showValidationMessage(`Saved ${modifiedRows.length} changes successfully`, 'success');
-    modifiedRows.forEach(row => row.classList.remove('table-warning'));
+    // Collect modified data
+    const changes = [];
+    modifiedRows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        const rowData = {
+            date: cells[0].textContent.trim(),
+            energy_produced: cells[1].textContent.trim().replace(/[,]/g, ''),
+            equipment_efficiency: cells[2].textContent.trim(),
+            revenue_inr: cells[3].textContent.trim().replace(/[₹,]/g, ''),
+            temperature: cells[4].textContent.trim(),
+            solar_irradiance: cells[5].textContent.trim()
+        };
+        changes.push(rowData);
+    });
+    
+    // Send to server
+    const plantId = window.location.pathname.split('/').pop();
+    fetch(`/api/save_data/${plantId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(changes)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showValidationMessage(`Saved ${modifiedRows.length} changes successfully`, 'success');
+            modifiedRows.forEach(row => row.classList.remove('table-warning'));
+        } else {
+            showValidationMessage('Error saving changes: ' + data.error, 'danger');
+        }
+    })
+    .catch(error => {
+        showValidationMessage('Network error saving changes', 'danger');
+        console.error('Error:', error);
+    });
 }
 
 function exportToCSV() {

@@ -64,6 +64,9 @@ class SolarMLPredictor:
                 'revenue_inr', 'plant_capacity', 'date'
             ])
             
+            # Convert date column to datetime
+            df['date'] = pd.to_datetime(df['date'])
+            
             # Feature engineering
             df = self._add_features(df)
             
@@ -234,6 +237,10 @@ class SolarMLPredictor:
                     features_scaled = self.scaler.transform([features])
                     
                     # Get predictions from both models
+                    if self.rf_model is None or self.xgb_model is None:
+                        logging.error("Models not loaded. Training required.")
+                        continue
+                        
                     rf_pred = self.rf_model.predict(features_scaled)[0]
                     xgb_pred = self.xgb_model.predict(features_scaled)[0]
                     
