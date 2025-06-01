@@ -89,9 +89,12 @@ class VVCEWeeklyAnalytics:
             if not historical_data:
                 return self._default_baseline()
             
-            df = pd.DataFrame(historical_data, columns=[
-                'energy', 'efficiency', 'revenue', 'irradiance', 'temperature'
-            ])
+            if len(historical_data) > 0:
+                df = pd.DataFrame(historical_data, columns=[
+                    'energy', 'efficiency', 'revenue', 'irradiance', 'temperature'
+                ])
+            else:
+                return self._default_baseline()
             
             return {
                 'avg_daily_energy': float(df['energy'].mean()),

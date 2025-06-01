@@ -227,24 +227,14 @@ class SolarMLPredictor:
             predictions = []
             start_date = datetime.now().date()
             
-            # Generate weekly predictions (26 weeks = 6 months)
-            for week in range(26):
-                week_start = start_date + timedelta(weeks=week)
-                week_end = week_start + timedelta(days=6)
+            # Generate daily predictions for 6 months (180 days)
+            for i in range(180):
+                pred_date = start_date + timedelta(days=i)
                 
-                # Generate daily predictions for the week and aggregate
-                weekly_energy = 0
-                weekly_revenue = 0
-                weekly_efficiency_sum = 0
-                daily_predictions = []
+                # Create feature vector
+                features = self._create_prediction_features(plant, pred_date, weather_forecast)
                 
-                for day_offset in range(7):
-                    pred_date = week_start + timedelta(days=day_offset)
-                    
-                    # Create feature vector for each day
-                    features = self._create_prediction_features(plant, pred_date, weather_forecast)
-                    
-                    if features is not None:
+                if features is not None:
                         features_scaled = self.scaler.transform([features])
                         
                         # Get predictions from both models

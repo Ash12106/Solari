@@ -298,25 +298,23 @@ def train_model(plant_id):
         # Initialize analytics system
         weekly_analytics = VVCEWeeklyAnalytics()
         
-        # Train the base ML model
+        # Train the base ML model first
         success = ml_predictor.train_models(plant_id)
         
         if success:
-            # Generate advanced weekly predictions
-            weekly_results = weekly_analytics.generate_weekly_predictions(plant_id, ml_predictor)
+            # Generate standard 6-month predictions first
+            standard_predictions = ml_predictor.predict_6_months(plant_id)
             
-            if weekly_results:
+            if standard_predictions:
                 return jsonify({
                     'success': True,
-                    'message': 'Advanced weekly prediction model trained successfully',
-                    'predictions_count': weekly_results['total_weeks'],
-                    'quarterly_analysis': len(weekly_results['quarterly_analysis']),
-                    'baseline_performance': weekly_results['baseline_performance']['data_points']
+                    'message': 'Model trained successfully and predictions generated',
+                    'predictions_count': len(standard_predictions)
                 })
             else:
                 return jsonify({
                     'success': False,
-                    'message': 'Model trained but weekly prediction generation failed'
+                    'message': 'Model trained but prediction generation failed'
                 })
         else:
             return jsonify({
