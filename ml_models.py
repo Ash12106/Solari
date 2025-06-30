@@ -235,68 +235,6 @@ class SolarMLPredictor:
                 features = self._create_prediction_features(plant, pred_date, weather_forecast)
                 
                 if features is not None:
-                        features_scaled = self.scaler.transform([features])
-                        
-                        # Get predictions from both models
-                        if self.rf_model is None or self.xgb_model is None:
-                            logging.error("Models not loaded. Training required.")
-                            continue
-                            
-                        rf_pred = self.rf_model.predict(features_scaled)[0]
-                        xgb_pred = self.xgb_model.predict(features_scaled)[0]
-                        
-                        # Ensemble prediction (average)
-                        daily_energy = (rf_pred + xgb_pred) / 2
-                        daily_revenue = daily_energy * 4.5  # INR per kWh
-                        daily_efficiency = features[5]  # equipment efficiency
-                        
-                        # Accumulate weekly totals
-                        weekly_energy += daily_energy
-                        weekly_revenue += daily_revenue
-                        weekly_efficiency_sum += daily_efficiency
-                        
-                        daily_predictions.append({
-                            'date': pred_date,
-                            'energy': daily_energy,
-                            'revenue': daily_revenue,
-                            'efficiency': daily_efficiency
-                        })
-                
-                # Calculate weekly aggregates and analytics
-                if daily_predictions:
-                    avg_weekly_efficiency = weekly_efficiency_sum / len(daily_predictions)
-                    
-                    # Advanced analytics
-                    energy_variance = np.var([d['energy'] for d in daily_predictions])
-                    peak_day = max(daily_predictions, key=lambda x: x['energy'])
-                    low_day = min(daily_predictions, key=lambda x: x['energy'])
-                    
-                    # Weekly performance score (0-100)
-                    performance_score = min(100, (weekly_energy / (plant.capacity_mw * 1000 * 7 * 8)) * 100)
-                    
-                    # Confidence based on variance and historical patterns
-                    confidence = max(0.6, min(0.95, 0.9 - (energy_variance / weekly_energy) * 0.3))
-                    
-                    weekly_prediction = {
-                        'week_start': week_start,
-                        'week_end': week_end,
-                        'week_number': week + 1,
-                        'energy': weekly_energy,
-                        'revenue': weekly_revenue,
-                        'efficiency': avg_weekly_efficiency,
-                        'confidence': confidence,
-                        'performance_score': performance_score,
-                        'energy_variance': energy_variance,
-                        'peak_day': peak_day['date'],
-                        'peak_energy': peak_day['energy'],
-                        'low_day': low_day['date'],
-                        'low_energy': low_day['energy'],
-                        'daily_breakdown': daily_predictions
-                    }
-                    
-                    predictions.append(weekly_prediction)
-                
-                if features is not None:
                     features_scaled = self.scaler.transform([features])
                     
                     # Get predictions from both models
@@ -308,24 +246,18 @@ class SolarMLPredictor:
                     xgb_pred = self.xgb_model.predict(features_scaled)[0]
                     
                     # Ensemble prediction (average)
-                    energy_pred = (rf_pred + xgb_pred) / 2
+                    daily_energy = (rf_pred + xgb_pred) / 2
+                    daily_revenue = daily_energy * 4.5  # INR per kWh
+                    daily_efficiency = features[5] if len(features) > 5 else 85.0  # equipment efficiency
                     
-                    # Calculate revenue (typical Indian solar tariff)
-                    tariff_rate = np.random.uniform(3.5, 5.5)  # INR per kWh
-                    revenue_pred = energy_pred * tariff_rate
-                    
-                    # Calculate efficiency
-                    max_possible = plant.capacity_mw * 1000 * 8  # Assuming 8 hours peak sun
-                    efficiency_pred = min(100, (energy_pred / max_possible) * 100)
-                    
-                    # Confidence score (simplified)
+                    # Calculate confidence (simplified)
                     confidence = np.random.uniform(0.75, 0.95)
                     
                     predictions.append({
                         'date': pred_date,
-                        'energy': energy_pred,
-                        'revenue': revenue_pred,
-                        'efficiency': efficiency_pred,
+                        'energy': daily_energy,
+                        'revenue': daily_revenue,
+                        'efficiency': daily_efficiency,
                         'confidence': confidence
                     })
             

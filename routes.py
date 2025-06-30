@@ -2,11 +2,15 @@ from flask import render_template, request, jsonify, redirect, url_for, flash
 from app import app, db
 from models import SolarPlant, WeatherData, EnergyProduction, MLPrediction, ModelPerformance, MaintenanceRecord
 from ml_models import ml_predictor
+# from advanced_ml_models import AdvancedSolarLSTMPredictor  # Temporarily disabled for compatibility
 from weather_api import weather_api
 from weekly_analytics import VVCEWeeklyAnalytics
 from datetime import datetime, timedelta, date
 import logging
 import json
+
+# Initialize advanced LSTM predictor when available
+# advanced_predictor = AdvancedSolarLSTMPredictor()
 
 @app.route('/')
 def index():
