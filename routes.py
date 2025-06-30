@@ -2,15 +2,12 @@ from flask import render_template, request, jsonify, redirect, url_for, flash
 from app import app, db
 from models import SolarPlant, WeatherData, EnergyProduction, MLPrediction, ModelPerformance, MaintenanceRecord
 from ml_models import ml_predictor
-# from advanced_ml_models import AdvancedSolarLSTMPredictor  # Temporarily disabled for compatibility
+from realistic_solar_model import realistic_predictor
 from weather_api import weather_api
 from weekly_analytics import VVCEWeeklyAnalytics
 from datetime import datetime, timedelta, date
 import logging
 import json
-
-# Initialize advanced LSTM predictor when available
-# advanced_predictor = AdvancedSolarLSTMPredictor()
 
 @app.route('/')
 def index():
@@ -297,37 +294,26 @@ def analytics_dashboard(plant_id=None):
 
 @app.route('/api/train_model/<int:plant_id>', methods=['POST'])
 def train_model(plant_id):
-    """API endpoint to train ML model with advanced weekly analytics"""
+    """API endpoint to train ML model with realistic physics-based predictions"""
     try:
-        # Initialize analytics system
-        weekly_analytics = VVCEWeeklyAnalytics()
+        # Use realistic physics-based model with authentic weather data
+        realistic_predictions = realistic_predictor.generate_realistic_predictions(plant_id)
         
-        # Train the base ML model first
-        success = ml_predictor.train_models(plant_id)
-        
-        if success:
-            # Generate standard 6-month predictions first
-            standard_predictions = ml_predictor.predict_6_months(plant_id)
-            
-            if standard_predictions:
-                return jsonify({
-                    'success': True,
-                    'message': 'Model trained successfully and predictions generated',
-                    'predictions_count': len(standard_predictions)
-                })
-            else:
-                return jsonify({
-                    'success': False,
-                    'message': 'Model trained but prediction generation failed'
-                })
+        if realistic_predictions:
+            return jsonify({
+                'success': True,
+                'message': 'Realistic model trained with authentic weather data and predictions generated',
+                'predictions_count': len(realistic_predictions),
+                'model_type': 'Physics-Based with Real Weather Data'
+            })
         else:
             return jsonify({
                 'success': False,
-                'message': 'Model training failed'
+                'message': 'Failed to generate realistic predictions - check weather API connection'
             })
             
     except Exception as e:
-        logging.error(f"Error training model with weekly analytics: {e}")
+        logging.error(f"Error training realistic model: {e}")
         return jsonify({
             'success': False,
             'message': f'Error: {str(e)}'
@@ -335,9 +321,9 @@ def train_model(plant_id):
 
 @app.route('/api/generate_predictions/<int:plant_id>', methods=['POST'])
 def generate_predictions(plant_id):
-    """API endpoint to generate predictions"""
+    """API endpoint to generate realistic predictions"""
     try:
-        predictions = ml_predictor.predict_6_months(plant_id)
+        predictions = realistic_predictor.generate_realistic_predictions(plant_id)
         
         if predictions:
             return jsonify({
