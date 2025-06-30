@@ -195,9 +195,20 @@ class RealisticSolarPredictor:
                 
                 daily_revenue = daily_energy * tariff_rate
                 
-                # Calculate system efficiency
-                theoretical_max = plant.capacity_mw * 1000 * 5.5  # Peak theoretical daily
-                efficiency = min(95, (daily_energy / theoretical_max) * 100) if theoretical_max > 0 else 0
+                # Calculate accurate system efficiency (Performance Ratio)
+                # Standard test conditions (STC) power rating
+                stc_daily_max = plant.capacity_mw * 1000 * (irradiance * 5.5)  # Based on actual irradiance
+                
+                # Calculate performance ratio (actual vs theoretical under current conditions)
+                if stc_daily_max > 0:
+                    performance_ratio = (daily_energy / stc_daily_max) * 100
+                    # Realistic efficiency ranges for solar systems in India
+                    efficiency = max(12, min(22, performance_ratio))  # 12-22% for crystalline silicon
+                else:
+                    efficiency = 0
+                
+                # Adjust for realistic equipment efficiency (75-85% typical system efficiency)
+                equipment_efficiency = efficiency * 0.8  # Account for inverter, wiring losses
                 
                 # Confidence based on weather forecast accuracy (decreases over time)
                 if day < 7:
@@ -211,7 +222,7 @@ class RealisticSolarPredictor:
                     'date': pred_date,
                     'energy': round(daily_energy, 2),
                     'revenue': round(daily_revenue, 2),
-                    'efficiency': round(efficiency, 2),
+                    'efficiency': round(equipment_efficiency, 2),
                     'confidence': round(confidence, 3),
                     'weather': {
                         'temperature': temperature,
